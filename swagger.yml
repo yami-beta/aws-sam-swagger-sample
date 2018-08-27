@@ -1,0 +1,52 @@
+swagger: '2.0'
+
+info:
+  title: aws-sam-swagger-sample
+  description: aws-sam-swagger-sample
+  version: 0.0.1
+
+schemes:
+  - https
+
+basePath:
+  Fn::Sub: /${Stage}
+
+paths:
+  /hello/{userName}:
+    get:
+      summary: Get Hello
+      parameters:
+        - name: userName
+          in: path
+          type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/HelloResponse'
+        '400':
+          description: Bad request. userName must be set.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      x-amazon-apigateway-integration:
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+
+definitions:
+  HelloResponse:
+    type: object
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: object
+        properties:
+          message:
+            type: string

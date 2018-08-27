@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample SAM Template
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+  ArtifactBucket:
+    Type: String
+    Default: ""
+
+Mappings:
+  StageConf:
+    dev:
+      ArtifactBucket: swagger.yml
+    stg:
+      ArtifactBucket: !Sub s3://${ArtifactBucket}/swagger.yml
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloApi:
+    Type: AWS::serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: !FindInMap [StageConf, !Ref Stage, "ArtifactBucket"]
+
+  HelloFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: dist/
+      Handler: index.hello
+      Runtime: nodejs8.10
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          PARAM1: VALUE
+      Events:
+        GetHello:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HelloApi
+            Path: /hello/{userName}
+            Method: get
+        # /hello でリクエストがあった際のエラー処理もLambdaで処理するため定義
+        GetHelloNoParam:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HelloApi
+            Path: /hello
+            Method: get
+
+Outputs:
+  HelloApi:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${HelloApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+
+  HelloFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloFunction.Arn
+
+  HelloFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloFunctionRole.Arn

@@ -1,0 +1,17 @@
+{
+  "name": "aws-sam-swagger-sample",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "yami-beta <yami-beta@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "watch": "tsc -w",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^10.9.2",
+    "prettier": "^1.14.2",
+    "typescript": "^3.0.1"
+  }
+}
