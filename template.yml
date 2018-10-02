@@ -10,13 +10,8 @@ Parameters:
   ArtifactBucket:
     Type: String
     Default: ""
-
-Mappings:
-  StageConf:
-    dev:
-      ArtifactBucket: swagger.yml
-    stg:
-      ArtifactBucket: !Sub s3://${ArtifactBucket}/swagger.yml
+  SwaggerPath:
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -25,14 +20,14 @@ Globals:
 
 Resources:
   HelloApi:
-    Type: AWS::serverless::Api
+    Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Stage
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: !FindInMap [StageConf, !Ref Stage, "ArtifactBucket"]
+            Location: !Ref SwaggerPath
 
   HelloFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
